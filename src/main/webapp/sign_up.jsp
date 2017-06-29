@@ -5,6 +5,7 @@
   Time: 19:58
   To change this template use File | Settings | File Templates.
 --%>
+<!DOCTYPE html>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
@@ -19,20 +20,6 @@
     </style>
 
     <style>
-        /*body{*/
-            /*background: #f1f1f1;*/
-        /*}*/
-        /*h3 a{*/
-            /*display: inline-block;*/
-            /*margin: 30px 10px;*/
-        /*}*/
-        /*#logo {*/
-            /*margin-bottom: 15px;*/
-        /*}*/
-        /*#sign-up {*/
-            /*color: #ea6f5a;*/
-        /*}*/
-
         body {
             background: #f1f1f1;
         }
@@ -65,16 +52,52 @@
         #password-message {
             display: none;
         }
-
     </style>
+    <script src="static/js/jquery.js"></script>
+    <script src="static/js/bootstrap.min.js"></script>
+    <script src="static/js/bootstrap-switch.min.js"></script>
+    <script src="static/js/nav.js"></script>
+
+    <script>
+        function validate(element,text,removedClass,addedClass) {
+            element.parent()
+                .removeClass(removedClass[0])
+                .addClass(addedClass[0]);
+            element.parent().next('small')
+                .text(text)
+                .removeClass(removedClass[1])
+                .addClass(addedClass[1])
+                .fadeIn('show');
+
+        }
+
+        $(function () {
+            $('#index').removeClass('active');
+
+            $('nick').on({
+                focus:function () {
+                    validate(
+                        $(this),
+                        '昵称 已经被使用',
+                        ['has-success','text-success'],
+                        ['has-error','text-danger']
+                    );
+                },
+                blur:function () {
+                    validate(
+                        $(this),
+                        '昵称 可以使用',
+                        ['has-error', 'text-danger'],
+                        ['has-success', 'text-success']
+                    );
+                }
+                });
+        });
+    </script>
+
 </head>
 <body>
 <%@ include file="nav.jsp"%>
-<%--<div class="container">--%>
-    <%--<div id="logo"><img src="static/image/logo.png" alt="简书"></div>--%>
-    <%--<div id="form-box" class="col-md-4 col-md-offset-4"></div>--%>
-    <%--<h3 class="text-center"><a class="text-muted" href="">登录</a> .<a id="sign-up" href="">注册</a> </h3>--%>
-<%--</div>--%>
 
 <div class='container'>
     <div id='logo'><img src='static/image/logo.png' alt='简书'></div>

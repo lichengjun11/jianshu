@@ -1,13 +1,22 @@
 package jianshu.alcj.xin.util;
 
 import javax.servlet.*;
+import javax.servlet.annotation.WebFilter;
+
+
+
+
+
+
+
+
 import javax.servlet.annotation.WebServlet;
 import java.io.IOException;
 
 /**
  * Created by lichengjun on 2017/6/28.
  */
-@WebServlet(urlPatterns = "/*")
+@WebFilter(urlPatterns = "/*")
 public class EncodingFilter implements Filter{
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {

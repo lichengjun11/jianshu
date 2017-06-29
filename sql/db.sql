@@ -10,11 +10,14 @@ DROP TABLE IF EXISTS db_jianshu.user;
 CREATE TABLE db_jianshu.user(
   id INT AUTO_INCREMENT PRIMARY KEY COMMENT 'ID PK',
   nick VARCHAR(255) UNICODE NOT NULL COMMENT '昵称',
+  mobile VARCHAR(255) NOT NULL UNIQUE  COMMENT '手机号',
   password VARCHAR(255) NOT NULL COMMENT '密码',
-  mobile VARCHAR(255) UNICODE  COMMENT '手机号',
-  avatar VARCHAR(255) COMMENT '头像',
+  avatar VARCHAR(255) NOT NULL DEFAULT'default_avatar.png',
   pay INT COMMENT '打赏金额，默认-2元；null - 关闭打赏',
-  money DECIMAL(8,2) COMMENT '账户余额'
+  money DECIMAL(8,2) COMMENT '账户余额',
+  lastIp VARCHAR(255) NOT NULL ,
+  lastTime DATETIME NOT NULL DEFAULT now(),
+  signup DATETIME NOT NULL DEFAULT now()
 ) COMMENT '用户表';
 
 -- 2.文集 notebook
@@ -213,55 +216,7 @@ REFERENCES db_jianshu.note(id);
 
 SHOW VARIABLES LIKE '%foreign%';  -- 检查外键开启状态
 -- 添加样本数据
-INSERT INTO db_jianshu.user (nick, mobile, password,money) VALUE ('Tom', '123', 'abc',0.00);
-INSERT INTO db_jianshu.user(nick,mobile,password,pay,money) VALUE ('Jerry','678','asd',2,0.00);
 
-INSERT INTO db_jianshu.notebook VALUE (NULL ,'Tom notebook',1);
-INSERT INTO db_jianshu.notebook VALUE (NULL ,'Jerry notebook',2);
-
-INSERT INTO db_jianshu.note (title, content, notebookId) VALUE ('tom title...','tom note content...',1);
-
-INSERT INTO db_jianshu.comment VALUE (NULL ,'Jerry COMMENT','2017-6-2 10:00:00',1,2,NULL );
-INSERT INTO db_jianshu.comment VALUE (NULL ,'Jerry COMMENT','2017-6-2 10:10:00',1,2,1 );
-
-INSERT INTO db_jianshu.follow(userId,followedUserId) VALUE (2,1);
-
-INSERT INTO db_jianshu.bookmark VALUE (NULL ,2,1);
-
-
-
-SELECT
-  u.avatar,
-  u.nick,
-  n.title,
-  n.content,
-  n.time,
-  n.views,
-  count(*) AS 评论次数 -- ？
-FROM db_jianshu.bookmark b INNER JOIN db_jianshu.note n
-  INNER JOIN db_jianshu.notebook nb
-  INNER JOIN db_jianshu.user u
-  INNER JOIN db_jianshu.comment c
-    ON b.noteId = n.id AND n.notebookId = nb.id AND nb.userId = u.id AND n.id = c.noteId
-WHERE b.userId = 2;
-
-SELECT count(*)
-FROM db_jianshu.note n LEFT JOIN db_jianshu.comment c--   ?
-    ON n.id = c.commentId
-WHERE noteId = 1;
 
 SELECT *
 FROM db_jianshu.user;
-
-START TRANSACTION ;
-
-INSERT INTO db_jianshu.pay VALUE (NULL ,2,'jerry message','wechat',2,1);
-
-UPDATE db_jianshu.user
-SET money = money + 2
-WHERE id = 1;
-
-COMMIT ;
-
-SELECT *
-FROM db_jianshu.pay ;

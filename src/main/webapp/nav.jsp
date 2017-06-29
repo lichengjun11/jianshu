@@ -5,6 +5,7 @@
   Time: 11:27
   To change this template use File | Settings | File Templates.
 --%>
+<!DOCTYPE html>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <nav class="navbar navbar-inverse navbar-fixed-top">
     <div class="container-fluid">
@@ -37,7 +38,7 @@
                 <li><a href="">Aa</a></li>
                 <li><a href="">登录</a></li>
                 <li>
-                    <button id="sign-up" class="btn btn-default" navbar-btn>注册</button>
+                    <button id="sign-up" class="btn btn-default navbar-btn" >注册</button>
                 </li>
                 <li>
                     <button id="write-note" class="btn btn-danger navbar-btn"><i class="glyphicon glyphicon-pencil"></i>
