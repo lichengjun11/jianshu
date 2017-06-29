@@ -28,6 +28,7 @@
     <%@ include file="nav.jsp"%>
   <div class="container">
       <small class="text-danger">${requestScope.message}</small>
+      <small class="text-danger">${param.message}</small>
   </div>
   </body>
 </html>
