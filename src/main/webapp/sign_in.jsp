@@ -49,6 +49,9 @@
         #password-message{
             display:none;
         }
+        img{
+            margin: 15px 0px;
+        }
     </style>
     <script src="static/js/jquery.js"></script>
     <script src="static/js/bootstrap.min.js"></script>
@@ -102,7 +105,30 @@
         $(function () {
             $('#li-index').removeClass('active');
             $('#li-sign-in').addClass('active');
-        })
+
+            $('sign-in-form').submit(function () {
+                validateMobile();
+                validatepassword();
+                return isMobileValidated && isPasswordValidated;
+            });
+
+            $('mobile').focus(function () {
+                showMessage(
+                    $(this),
+                    '',
+                    ['has-error','text-danger'],
+                    []
+                );
+            });
+            $('password').focus(function () {
+                showMessage(
+                    $(this),
+                    '',
+                    ['has-error','text-danger'],
+                    []
+                );
+            });
+        });
 
     </script>
 </head>
@@ -126,6 +152,11 @@
                 <input id="password" name="password" class="form-control input-lg" type="text" placeholder="密码">
             </div>
             <small id="password-message"></small>
+
+            <img id="img" src="kaptcha.jpg" alt="">
+             <input id="kaptcha" name="kaptcha" class="form-control input-lg" type="text" placeholder="">
+
+
             <div class="checkbox">
                 <label class="text-muted"><input type="checkbox" checked="checked">记住我</label>
                 <a class="pull-right text-muted" href="">登录遇到问题</a>

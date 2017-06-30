@@ -28,10 +28,39 @@ public class UserAction extends HttpServlet {
             signUp(req,resp);
             return;
         }
+        if ("signIn".equals(action)) {
+            signIn(req,resp);
+            return;
+        }
         Error.showError(req,resp);
     }
 
-    private void signUp(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    private void signIn(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+            String mobile = req.getParameter("mobile").trim();
+            String password = req.getParameter("password");
+
+            Connection connection = Db.getConnection();
+            PreparedStatement preparedStatement = null;
+            ResultSet resultSet = null;
+
+            String sql = "SELECT * FROM db_jianshu.user WHERE mobile = ?";
+        try {
+            if (connection != null) {
+                preparedStatement = connection.prepareStatement(sql);
+            }else {
+                Error.showError(req,resp);
+                return;
+            }
+            preparedStatement.setString(1,"mobile");
+            resultSet = preparedStatement.executeQuery();
+            
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+        private void signUp(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String nick = req.getParameter("nick").trim();
         String mobile = req.getParameter("mobile").trim();
         // TODO: 2017/6/29
