@@ -19,7 +19,7 @@
         </div>
         <div id="nav" class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
-                <li id="index" class="active"><a href="/">首页</a></li>
+                <li id="li-index" class="active"><a href="/">首页</a></li>
                 <li><a href="">下载 APP</a></li>
             </ul>
 
@@ -36,7 +36,7 @@
 
             <ul class="nav navbar-nav navbar-right">
                 <li><a href="">Aa</a></li>
-                <li><a href="">登录</a></li>
+                <li><a href="sign_in.jsp">登录</a></li>
                 <li>
                     <button id="sign-up" class="btn btn-default navbar-btn" >注册</button>
                 </li>

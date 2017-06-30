@@ -75,15 +75,15 @@
             $('#index').removeClass('active');
 
             $('#nick').on({
-                focus:function () {
+                focus: function () {
                     validate(
                         $(this),
                         '昵称 已经被使用',
-                        ['has-success','text-success'],
-                        ['has-error','text-danger']
+                        ['has-success', 'text-success'],
+                        ['has-error', 'text-danger']
                     );
                 },
-                blur:function () {
+                blur: function () {
                     validate(
                         $(this),
                         '昵称 可以使用',
@@ -91,42 +91,7 @@
                         ['has-success', 'text-success']
                     );
                 }
-                });
-
-            function validate(async, field) {
-                var element = $('#' + field);
-                var name = (field === 'nick') ? '昵称' : '手机号';
-                if (element.val().trim().length === 0) {
-                    showMessage(
-                        element,
-                        '请输入' + name,
-                        ['has-success', 'text-success'],
-                        ['has-error', 'text-danger']
-                    );
-                    isNickValidated = false;
-                    return;
-                }
-                $.ajax({
-                    url: 'user',
-                    type: 'post',
-                    data: {'action': 'isNickOrMobileExisted', 'field': field, 'value': element.val()},
-                    dataType: 'json',
-                    async: async,
-                    success: function (result) {
-                        var isExisted = result.isExisted;
-                        console.log("isExisted: " + isExisted);
-                        if (isExisted) {
-                            showMessage(
-                                element,
-                                name + ' 已经被使用',
-                                ['has-success', 'text-success'],
-                                ['has-error', 'text-danger']
-                            );
-                            if (field === 'nick') {
-                                isNickValidated = false;
-                            } else {
-                                isMobileValidated = false;
-                            }
+            });
         });
     </script>
 
