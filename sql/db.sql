@@ -17,7 +17,9 @@ CREATE TABLE db_jianshu.user(
   money DECIMAL(8,2) COMMENT '账户余额',
   lastIp VARCHAR(255) NOT NULL ,
   lastTime DATETIME NOT NULL DEFAULT now(),
-  signup DATETIME NOT NULL DEFAULT now()
+  signup DATETIME NOT NULL DEFAULT now(),
+  signUpTime DATETIME      NOT NULL DEFAULT now()
+
 ) COMMENT '用户表';
 
 -- 2.文集 notebook
