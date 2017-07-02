@@ -73,25 +73,47 @@
 
         $(function () {
             $('#index').removeClass('active');
-
-            $('#nick').on({
-                focus: function () {
-                    validate(
-                        $(this),
-                        '昵称 已经被使用',
-                        ['has-success', 'text-success'],
-                        ['has-error', 'text-danger']
-                    );
-                },
-                blur: function () {
-                    validate(
-                        $(this),
-                        '昵称 可以使用',
-                        ['has-error', 'text-danger'],
-                        ['has-success', 'text-success']
-                    );
-                }
-            });
+            var nick = $('#nick');
+        nick.blur(function () {
+            console.log('1');
+            if (nick.val().length === 0){
+                console.log('2');
+                validate(
+                    nick,
+                    '请输入昵称',
+                    ['has-success','text-success'],
+                    ['has-error','text-danger']
+                );
+                return;
+            }
+           $.ajax({
+               url:'user',
+               type:'post',
+               data:{'action':'isNickExisted','nick':nick.val()},
+               dataType:'json',
+               success:function (result) {
+                   var isNickExisted = result.isNickExisted;
+                   console.log("isNickExisted:" + isNickExisted);
+                   if (isNickExisted){
+                       console.log('3');
+                       validate(
+                           nick,
+                           '昵称已经被使用',
+                           ['has-success','text-success'],
+                           ['has-error','text-danger']
+                       );
+                   }else {
+                       console.log('4');
+                       validate(
+                           nick,
+                           '昵称可以使用',
+                           ['has-error','text-danger'],
+                           ['has-success','text-success']
+                       );
+                   }
+               }
+           })
+        });
         });
     </script>
 
