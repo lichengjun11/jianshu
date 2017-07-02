@@ -59,7 +59,12 @@
     <script src="static/js/nav.js"></script>
 
     <script>
-        function validate(element,text,removedClass,addedClass) {
+        
+        var isNickValidated; // 昵称通过了验证
+        var isMobileValidated; // 手机号通过了验证
+        var ispasswordValidated; // 密码通过了验证
+        
+        function showMessage(element,text,removedClass,addedClass) {
             element.parent()
                 .removeClass(removedClass[0])
                 .addClass(addedClass[0]);
@@ -67,54 +72,186 @@
                 .text(text)
                 .removeClass(removedClass[1])
                 .addClass(addedClass[1])
-                .fadeIn('show');
-
+                .fadeIn('slow');
         }
 
-        $(function () {
-            $('#index').removeClass('active');
-            var nick = $('#nick');
-        nick.blur(function () {
-            console.log('1');
-            if (nick.val().length === 0){
-                console.log('2');
-                validate(
-                    nick,
-                    '请输入昵称',
+        function validate(async,field) {
+            var element = $('#' + field);
+            var name = (field === 'nick') ? '昵称' : '手机号';
+            if (element.val().trim().length === 0){
+                showMessage(
+                    element,
+                    "请输入" + name,
+                    ['has-success','text-success'],
+                    ['has-error','has-danger']
+                );
+                isNickValidated = false;
+                return;
+            }
+
+            $.ajax({
+                url:'user',
+                type:'post',
+                data:{'action':'isNickOrMobileExisted','field':field,'value':element.val()},
+                dataType:'json',
+                async:async,
+                success:function (result) {
+                    var isExisted = result.isExisted;
+                    console.log("isExisted:" + isExisted);
+                    if (isExisted){
+                        showMessage(
+                            element,
+                            name + "已经被使用",
+                            ['has-success','text-success'],
+                            ['has-error','has-danger']
+                        );
+                        if (field === 'nick'){
+                            isNickValidated = false;
+                        }else {
+                            isMobileValidated = false;
+                        }
+                    }else {
+                        showMessage(
+                            element,
+                            name + '可以使用',
+                            ['has-error','text-danger'],
+                            ['has-success','text-success']
+                        );
+                        if (field === 'nick'){
+                            isNickValidated = true;
+                        }else {
+                            isMobileValidated = true;
+                        }
+                    }
+                },
+                error:function () {
+                    window.location.href = 'default.jsp?message = ERRPR.';
+                }
+
+            });
+        }
+            
+        function validatePassword() {
+            var password = $('#password');
+            if (password.val().length < 6){
+                showMessage(
+                    password,
+                    '密码不能少于6个字符',
                     ['has-success','text-success'],
                     ['has-error','text-danger']
                 );
-                return;
+                ispasswordValidated = false;
+            }else {
+                showMessage(
+                    password,
+                    '密码可以使用',
+                    ['has-error','has-danger'],
+                    ['has-success','text-success']
+                );
+                ispasswordValidated = true;
             }
-           $.ajax({
-               url:'user',
-               type:'post',
-               data:{'action':'isNickExisted','nick':nick.val()},
-               dataType:'json',
-               success:function (result) {
-                   var isNickExisted = result.isNickExisted;
-                   console.log("isNickExisted:" + isNickExisted);
-                   if (isNickExisted){
-                       console.log('3');
-                       validate(
-                           nick,
-                           '昵称已经被使用',
-                           ['has-success','text-success'],
-                           ['has-error','text-danger']
-                       );
+        }
+
+            $(function () {
+               $('#li-index').removeClass('active');
+               $('#nick').blur(function () {
+                    validate(true,'nick');
+               });
+               $('#mobile').blur(function () {
+                  validate(true,'mobile');
+               });
+               $('#password').blur(function () {
+                  validatePassword();
+               });
+
+               $('#sign-up-form').submit(function () {
+                   validate(false,'nick');
+                   validate(false,'mobile');
+                   validatePassword();
+                   if (!isNickValidated){
+                       $('#nick').focus;
+                   }else if (!isMobileValidated){
+                       $('#mobile').focus;
                    }else {
-                       console.log('4');
-                       validate(
-                           nick,
-                           '昵称可以使用',
-                           ['has-error','text-danger'],
-                           ['has-success','text-success']
-                       );
+                       $('#password').focus;
                    }
-               }
-           })
-        });
-        });
+                   return isNickValidated && isMobileValidated && ispasswordValidated;
+               });
+            });
+        
+        
+        
+//        var canSubmitForm;
+//
+//        function showMessage(element,text,removedClass,addedClass) {
+//            element.parent()
+//                .removeClass(removedClass[0])
+//                .addClass(addedClass[0]);
+//            element.parent().next('small')
+//                .text(text)
+//                .removeClass(removedClass[1])
+//                .addClass(addedClass[1])
+//                .fadeIn('show');
+//
+//        }
+//
+//        function validate(async) {
+//            var nick = $('#nick');
+//            if (nick.val().length === 0) {
+//                validate(
+//                    nick,
+//                    '请输入昵称',
+//                    ['has-success', 'text-success'],
+//                    ['has-error', 'text-danger']
+//                );
+//                return;
+//            }
+//            $.ajax({
+//                url: 'user',
+//                type: 'post',
+//                data: {'action': 'isNickExisted', 'nick': nick.val()},
+//                dataType: 'json',
+//                async: async,
+//                success: function (result) {
+//                    var isNickExisted = result.isNickExisted;
+//                    console.log("isNickExisted:" + isNickExisted);
+//                    if (isNickExisted) {
+//                        showMessage(
+//                            nick,
+//                            '昵称已经被使用',
+//                            ['has-success', 'text-success'],
+//                            ['has-error', 'text-danger']
+//                        );
+//                        canSubmitForm = false;
+//                    } else {
+//                        showMessage(
+//                            nick,
+//                            '昵称可以使用',
+//                            ['has-error', 'text-danger'],
+//                            ['has-success', 'text-success']
+//                        );
+//                        canSubmitForm = true;
+//                    }
+//
+//                }
+//            });
+//        }
+//            $(function () {
+//                console.log("2");
+//                $('#index').removeClass('active');
+//                $('#nick').blur(function () {
+//                    console.log('3');
+//                    validate(true);
+//                });
+//
+//                $('#sign-up-form').submit(function () {
+//                    console.log('1');
+//                    validate(false);
+//
+//                    return false;
+//                });
+//            });
+
     </script>
 
 </head>
@@ -125,7 +262,7 @@
     <div id='logo'><img src='static/image/logo.png' alt='简书'></div>
     <div id='form-box' class='col-md-4 col-md-offset-4'>
         <h3 class='text-center'><a class='text-muted' href=''>登录</a> · <a id='sign-up' href=''>注册</a></h3>
-        <form class='form-horizontal' action='user' method='post'>
+        <form id="sign-up-form" class='form-horizontal' action='user' method='post'>
             <input type='hidden' name='action' value='signUp'>
             <div class='input-group'>
                 <span class='input-group-addon'><i class='glyphicon glyphicon-user'></i></span>
@@ -134,12 +271,12 @@
             <small id='nick-message'></small>
             <div class='input-group'>
                 <span class='input-group-addon'><i class='glyphicon glyphicon-phone'></i></span>
-                <input name='mobile' class='form-control input-lg' type='text' placeholder='手机号'>
+                <input id="mobile" name='mobile' class='form-control input-lg' type='text' placeholder='手机号'>
             </div>
             <small id='mobile-message'></small>
             <div class='input-group'>
                 <span class='input-group-addon'><i class='glyphicon glyphicon-lock'></i></span>
-                <input name='password' class='form-control input-lg' type='password' placeholder='设置密码'>
+                <input id="password" name='password' class='form-control input-lg' type='password' placeholder='设置密码'>
             </div>
             <small id='password-message'></small>
             <button class='btn btn-success btn-lg btn-block'>注册</button>
