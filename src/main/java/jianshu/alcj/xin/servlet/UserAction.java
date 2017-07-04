@@ -30,31 +30,45 @@ public class UserAction extends HttpServlet {
         String action = req.getParameter("action");
 
         if ("signUp".equals(action)) {
-            signUp(req,resp);
+            signUp(req, resp);
             return;
         }
-        if ("isNickExisted".equals(action)) {
-            isNickExisted(req,resp);
+        if ("isNickOrMobileExisted".equals(action)) {
+            isNickOrMobileExisted(req, resp);
+            return;
+        }
+
+        if ("isExisted".equals(action)) {
+            isExisted(req, resp, "nick", req.getParameter("nick").trim());
             return;
         }
         if ("signIn".equals(action)) {
-            signIn(req,resp);
+            signIn(req, resp);
             return;
         }
-        Error.showError(req,resp);
+        Error.showError(req, resp);
     }
 
-        private void signUp(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    private void signUp(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String nick = req.getParameter("nick").trim();
         String mobile = req.getParameter("mobile").trim();
-        // TODO: 2017/6/29
+        String plainPassword = req.getParameter("password");
+        if (nick.length() == 0) {
+            req.setAttribute("message", "请输入昵称");
+            req.getRequestDispatcher("sign_up.jsp").forward(req, resp);
+            return;
+        }
+        if (mobile.length() == 0) {
+            req.setAttribute("message", "请输入手机号");
+            req.getRequestDispatcher("sign_up.jsp").forward(req, resp);
+            return;
+        }
+        if (plainPassword.length() < 6) {
+            req.setAttribute("message", "密码不能少于6个字符");
+            req.getRequestDispatcher("sign_up.jsp").forward(req, resp);
+            return;
+        }
 
-            // 先做昵称验证
-            if (isNickExisted(req,resp)){
-                req.setAttribute("message","昵称已经被使用");
-                req.getRequestDispatcher("sign_up.jsp").forward(req,resp);
-                return;
-            }
 
         StrongPasswordEncryptor encryptor = new StrongPasswordEncryptor();
         String password = encryptor.encryptPassword(req.getParameter("password"));
@@ -65,56 +79,71 @@ public class UserAction extends HttpServlet {
         try {
             if (connection != null) {
                 preparedStatement = connection.prepareStatement(sql);
-            }else {
-                Error.showError(req,resp);
+            } else {
+                Error.showError(req, resp);
                 return;
             }
-            preparedStatement.setString(1,nick);
-            preparedStatement.setString(2,mobile);
-            preparedStatement.setString(3,password);
-            preparedStatement.setString(4,req.getRemoteAddr());
+            preparedStatement.setString(1, nick);
+            preparedStatement.setString(2, mobile);
+            preparedStatement.setString(3, password);
+            preparedStatement.setString(4, req.getRemoteAddr());
 
             preparedStatement.executeUpdate();
             resp.sendRedirect("default.jsp");
         } catch (SQLException e) {
             e.printStackTrace();
-        }finally {
-            Db.close(null,preparedStatement,connection);
+        } finally {
+            Db.close(null, preparedStatement, connection);
         }
     }
 
-    private boolean isNickExisted(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String nick = req.getParameter("nick").trim();
+    private void isNickOrMobileExisted(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String field = req.getParameter("field");
+        String value = req.getParameter("value").trim();
+
+        boolean isExisted = isExisted(req, resp, field, value);
+
+        resp.setContentType("application/json");
+        Writer writer = resp.getWriter();
+        Map<String, Object> map = new HashMap<>();
+        map.put("isExisted", isExisted);
+        writer.write(JSON.toJSONString(map));
+    }
+
+
+    private boolean isExisted(HttpServletRequest req, HttpServletResponse resp, String field, String value) throws ServletException, IOException {
         boolean isNickExisted = false;
+        boolean isMoileExisted = false;
+
         Connection connection = Db.getConnection();
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
 
-        String sql = "SELECT * FROM db_jianshu.user WHERE nick = ?";
+        String sql = "SELECT * FROM db_jianshu.user WHERE " + field + " = ?";
         try {
             if (connection != null) {
                 preparedStatement = connection.prepareStatement(sql);
-            }else {
-                Error.showError(req,resp);
+            } else {
+                Error.showError(req, resp);
+                return false;
             }
-            preparedStatement.setString(1,nick);
+            preparedStatement.setString(1, value);
             resultSet = preparedStatement.executeQuery();
-            isNickExisted = resultSet.next();
+            if (field.equals("nick")) {
+                isNickExisted = resultSet.next();
+            } else {
+                isMoileExisted = resultSet.next();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
-        }finally {
-            Db.close(resultSet,preparedStatement,connection);
+        } finally {
+            Db.close(resultSet, preparedStatement, connection);
         }
-        resp.setContentType("application/json");
-        Writer writer = resp.getWriter();
-        Map<String ,Object> map = new HashMap<>();
-        map.put("isNickExisted",isNickExisted);
-        String json = JSON.toJSONString(map);
-        writer.write(json);
-        return true;
+        return isNickExisted || isMoileExisted;
     }
 
-        private void signIn(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+    private void signIn(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         String mobile = req.getParameter("mobile").trim();
         String plainPassword = req.getParameter("password");
@@ -139,7 +168,7 @@ public class UserAction extends HttpServlet {
                 String encryptedPassword = encryptor.encryptPassword(plainPassword);
 
                 if (encryptor.checkPassword(plainPassword, encryptedPassword)) {
-                    System.out.println(encryptor.checkPassword(plainPassword,encryptedPassword));
+                    System.out.println(encryptor.checkPassword(plainPassword, encryptedPassword));
                     System.out.println("if3");
                     User user = new User(
                             resultSet.getInt("id"),
@@ -162,12 +191,11 @@ public class UserAction extends HttpServlet {
                     req.getSession().setAttribute("user", user.getNick());
                     resp.sendRedirect("default.jsp");
                 }
-            }
-            else  {
+            } else {
                 System.out.println("if5");
-            req.setAttribute("message", "登录失败，手机号/邮箱或密码错误");
-            req.getRequestDispatcher("sign_in.jsp").forward(req,resp);
-                }
+                req.setAttribute("message", "登录失败，手机号/邮箱或密码错误");
+                req.getRequestDispatcher("sign_in.jsp").forward(req, resp);
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -179,8 +207,8 @@ public class UserAction extends HttpServlet {
     }
 
 
-        @Override
+    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doPost(req,resp);
+        doPost(req, resp);
     }
 }

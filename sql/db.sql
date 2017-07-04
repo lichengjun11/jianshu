@@ -1,4 +1,5 @@
 
+SHOW DATABASES ;
 
 DROP DATABASE IF EXISTS db_jianshu;
 CREATE DATABASE db_jianshu;
